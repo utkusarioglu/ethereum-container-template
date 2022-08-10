@@ -32,7 +32,7 @@ jobs:
         with:
           tags: |
             utkusarioglu/ethereum-container-environment:latest
-            utkusarioglu/ethereum-container-environment:1.0.0
+            utkusarioglu/ethereum-container-environment:1.0.1
           file: src/Dockerfile.dev
           push: ${{ github.ref == 'refs/heads/main' }}
           build-args: |
