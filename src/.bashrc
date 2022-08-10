@@ -116,6 +116,7 @@ fi
 alias ll='ls -alFh --group-directories-first'
 alias la='ls -A --group-directories-first'
 alias l='ls -CF'
+alias create-env-example="/scripts/create-env-example.sh"
 
 # Utku!
 set -o vi

@@ -83,5 +83,7 @@ RUN mkdir -p /home/hardhat/.config/matplotlib && \
 
 COPY src/.bashrc /home/hardhat/.bashrc
 COPY src/.inputrc /home/hardhat/.inputrc
+COPY scripts/create-env-example.sh /scripts/create-env-example.sh
+
 USER hardhat
 CMD ["/bin/bash"]
