@@ -84,3 +84,4 @@ RUN mkdir -p /home/hardhat/.config/matplotlib && \
 COPY src/.bashrc /home/hardhat/.bashrc
 COPY src/.inputrc /home/hardhat/.inputrc
 USER hardhat
+CMD ["/bin/bash"]
