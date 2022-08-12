@@ -31,8 +31,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           tags: |
-            utkusarioglu/ethereum-container-environment:latest
-            utkusarioglu/ethereum-container-environment:1.0.1
+            utkusarioglu/ethereum-devcontainer:latest
+            utkusarioglu/ethereum-devcontainer:1.0.0
           file: src/Dockerfile.dev
           push: ${{ github.ref == 'refs/heads/main' }}
           build-args: |
