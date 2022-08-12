@@ -83,9 +83,19 @@ RUN mkdir -p /github/home/.cache/hardhat-nodejs && \
 RUN mkdir -p /home/hardhat/.config/matplotlib && \
   chown -R 1000:1000 /home/hardhat/.config/matplotlib 
 
-ADD https://gist.githubusercontent.com/utkusarioglu/2d4be44dc7707afccd540ad99ba385e6/raw/3eb6693a91b1aa5b3863d087de1d189b72eeeec8/create-env-example.sh /scripts/create-env-example.sh
-ADD https://gist.githubusercontent.com/utkusarioglu/3523b00578807d63b05399fe57a4b2a7/raw/7df99dbbeb8ee4d14396be043aef4fbf8fb42ce5/.bashrc /home/$USERNAME/.bashrc
-ADD https://gist.githubusercontent.com/utkusarioglu/d5c216c744460c45bf6260d0de4131b4/raw/d227102e3630a93f8eafcb4d2a5a053d2ae04415/.inputrc /home/$USERNAME/.inputrc
+ADD --chown=$USERNAME:1000 \
+  https://gist.githubusercontent.com/utkusarioglu/2d4be44dc7707afccd540ad99ba385e6/raw/3eb6693a91b1aa5b3863d087de1d189b72eeeec8/create-env-example.sh \
+  /scripts/create-env-example.sh
+ADD --chown=$USERNAME:1000 \
+  https://gist.githubusercontent.com/utkusarioglu/3523b00578807d63b05399fe57a4b2a7/raw/7df99dbbeb8ee4d14396be043aef4fbf8fb42ce5/.bashrc \
+  /home/$USERNAME/.bashrc
+ADD --chown=$USERNAME:1000 \
+  https://gist.githubusercontent.com/utkusarioglu/d5c216c744460c45bf6260d0de4131b4/raw/d227102e3630a93f8eafcb4d2a5a053d2ae04415/.inputrc \
+  /home/$USERNAME/.inputrc
+RUN chmod +x \
+  /scripts/create-env-example.sh \
+  /home/$USERNAME/.bashrc \
+  /home/$USERNAME/.inputrc 
 
 USER $USERNAME
 
