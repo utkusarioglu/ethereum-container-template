@@ -41,8 +41,6 @@ jobs:
             ROOT_PASS=${{ secrets.DOCKER_IMAGE_ROOT_PASS }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          build-args: |
-            ROOT_PASS=${{ secrets.DOCKER_IMAGE_ROOT_PASS }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
