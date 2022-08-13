@@ -1,6 +1,9 @@
 # ppa:ethereum is not yet available on 22.04
 FROM ubuntu:20.04
+
+ARG ROOT_PASS=root
 ARG USERNAME="hardhat"
+
 SHELL ["/bin/bash", "-c"]
 
 ENV DEBIAN_FRONTEND=nonintercative
@@ -96,6 +99,8 @@ RUN chmod +x \
   /scripts/create-env-example.sh \
   /home/$USERNAME/.bashrc \
   /home/$USERNAME/.inputrc 
+
+RUN echo "root:$ROOT_PASS" | chpasswd
 
 USER $USERNAME
 
