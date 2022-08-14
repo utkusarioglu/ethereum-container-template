@@ -32,6 +32,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
+          context: .
           tags: |
             utkusarioglu/ethereum-devcontainer:latest
             utkusarioglu/ethereum-devcontainer:1.0.1
