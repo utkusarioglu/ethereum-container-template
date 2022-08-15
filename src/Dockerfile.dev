@@ -104,6 +104,3 @@ RUN echo "root:$ROOT_PASS" | chpasswd
 ENV SHELL /bin/bash
 
 USER $USERNAME
-
-# TODO make this work
-# CMD ["/bin/bash"]
