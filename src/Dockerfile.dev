@@ -101,6 +101,7 @@ RUN chmod +x \
   /home/$USERNAME/.inputrc 
 
 RUN echo "root:$ROOT_PASS" | chpasswd
+ENV SHELL /bin/bash
 
 USER $USERNAME
 
