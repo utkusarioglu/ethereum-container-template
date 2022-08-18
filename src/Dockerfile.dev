@@ -1,14 +1,22 @@
 # ppa:ethereum is not yet available on 22.04
 FROM ubuntu:20.04
 
-ARG ROOT_PASS=root
-ARG USERNAME="hardhat"
+ARG ROOT_PASS
+ARG USERNAME=hardhat
+
+RUN for arg in ROOT_PASS; \
+  do \
+  [ ! -z "${arg}" ] || { echo "ARG \"$arg\" needs to be set"; exit 1; } \
+  done;
+
+RUN echo "root:$ROOT_PASS" | chpasswd
 
 SHELL ["/bin/bash", "-c"]
 
 ENV DEBIAN_FRONTEND=nonintercative
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+  apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends \
   bash-completion \
   build-essential \
   ca-certificates \
@@ -67,8 +75,6 @@ RUN cd $VIRTUAL_ENV_PATH_SLITHER/bin && \
   && tar -xzf echidna.tar.gz \
   && rm echidna.tar.gz
 
-ARG ROOT_PASS=ROOT
-
 # This is for crytic-compile binary
 ENV PATH="${PATH}:${HOME}/.local/bin"
 
@@ -86,6 +92,10 @@ RUN mkdir -p /github/home/.cache/hardhat-nodejs && \
 RUN mkdir -p /home/hardhat/.config/matplotlib && \
   chown -R 1000:1000 /home/hardhat/.config/matplotlib 
 
+ENV SHELL /bin/bash
+
+USER $USERNAME
+
 ADD --chown=$USERNAME:1000 \
   https://gist.githubusercontent.com/utkusarioglu/2d4be44dc7707afccd540ad99ba385e6/raw/3eb6693a91b1aa5b3863d087de1d189b72eeeec8/create-env-example.sh \
   /scripts/create-env-example.sh
@@ -99,8 +109,3 @@ RUN chmod +x \
   /scripts/create-env-example.sh \
   /home/$USERNAME/.bashrc \
   /home/$USERNAME/.inputrc 
-
-RUN echo "root:$ROOT_PASS" | chpasswd
-ENV SHELL /bin/bash
-
-USER $USERNAME
