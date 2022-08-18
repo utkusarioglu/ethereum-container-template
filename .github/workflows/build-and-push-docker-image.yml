@@ -7,7 +7,11 @@ on:
     paths:
       - src/**
   workflow_dispatch:
-  workflow_call:
+
+env:
+  CONTAINER_NAME: ethereum-devcontainer
+  CACHE_TO_DEST: /tmp/.buildx-cache-new
+  CACHE_FROM_SRC: /tmp/.buildx-cache
 
 jobs:
   build-and-push-docker-image:
@@ -17,36 +21,75 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v25
+        with:
+          files: src/**
+
+      - name: Declare run state
+        id: run-state
+        run: |
+          if [ ${{ steps.changed-files.outputs.any_modified }} == true ] || \
+            [ ${{ github.event_name }} == workflow_dispatch ];
+          then
+            echo "::set-output name=run-docker-build::true"
+            echo "::debug::Docker build will carry out as expected."
+          else
+            echo "::set-output name=run-docker-build::false"
+            echo "::debug::Docker build is cancelled as none of the watched files have been changed."
+            echo "Docker build is cancelled as none of the watched files have been changed."
+          fi
 
       - name: Set up Docker Buildx
+        if: steps.run-state.outputs.run-docker-build == 'true'
         id: buildx
         uses: docker/setup-buildx-action@v1
 
       - name: Login to DockerHub
+        if: steps.run-state.outputs.run-docker-build == 'true'
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build image and push to Docker Hub
-        id: docker_build
+        if: steps.run-state.outputs.run-docker-build == 'true'
+        id: docker-build
         uses: docker/build-push-action@v2
         with:
           context: .
           tags: |
-            utkusarioglu/ethereum-devcontainer:latest
-            utkusarioglu/ethereum-devcontainer:1.0.1
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}:1.0.2
           file: src/Dockerfile.dev
           push: ${{ github.ref == 'refs/heads/main' }}
+          cache-from: type=local,src=${{ env.CACHE_FROM_SRC }}
+          cache-to: type=local,mode=max,dest=${{ env.CACHE_TO_DEST }}
           build-args: |
             ROOT_PASS=${{ secrets.DOCKER_IMAGE_ROOT_PASS }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
 
       - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+        if: steps.run-state.outputs.run-docker-build == 'true'
+        run: echo ${{ steps.docker-build.outputs.digest }}
+
+      - name: Set Docker Hub description
+        if: steps.run-state.outputs.run-docker-build == 'true'
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}
+          short-description: Ethereum devcontainers
+          readme-filepath: src/DOCKER_README.md
 
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          rm -rf ${{ env.CACHE_FROM_SRC }}
+          if [ -d ${{ env.CACHE_FROM_SRC }} ];
+          then
+            mv ${{ env.CACHE_TO_DEST }} ${{ env.CACHE_FROM_SRC }}
+          fi
