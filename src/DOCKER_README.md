@@ -11,7 +11,7 @@ Offers a vast array of tools:
 - vim 
 - wget
 - solc
-- Myril
+- Mythril
 - solc-select
 - Crytic-compile
 - Manticore
