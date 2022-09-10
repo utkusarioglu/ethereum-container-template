@@ -1,7 +1,7 @@
 #!/bin/bash
 
 branch=$(git branch --show-current)
-
+tag_message="This tag's artifacts are not meant for consumption. Use at your own risk."
 
 if [[ $branch != feature/* ]];
 then
@@ -18,5 +18,5 @@ next_number=$((last_number + 1))
 message="$branch/$next_number"
 git add .
 git commit -m $message
-git tag -a $message -m "This tag's artifacts are not meant for consumption"
+git tag -a $message -m $tag_message
 git push --follow-tags

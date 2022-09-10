@@ -109,7 +109,7 @@ jobs:
           imageName: ${{ steps.variables.outputs.image-name }}
           imageTag: ${{ steps.variables.outputs.image-tag }}
           subFolder: src
-          runCmd: scripts/devcontainer-run-cmd.sh
+          runCmd: /scripts/devcontainer-check.sh
 
       - name: Push devcontainer ${{ steps.variables.outputs.short-image-ref }}
         if: steps.run_state.outputs.run_docker_build == 'true'

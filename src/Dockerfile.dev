@@ -109,3 +109,5 @@ RUN chmod +x \
   /scripts/create-env-example.sh \
   /home/$USERNAME/.bashrc \
   /home/$USERNAME/.inputrc 
+
+COPY scripts/mounted /scripts
