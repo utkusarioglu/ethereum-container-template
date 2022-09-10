@@ -3,7 +3,8 @@ name: build-and-push
 on:
   push:
     tags:
-      - "**/**/**"
+      - "*"
+      - "feature/*/*"
     paths:
       - src/**
       - .github/workflows/build-and-push.yml
@@ -60,8 +61,7 @@ jobs:
         run: |
           image_name=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}
           repo_tag=${{ steps.latest_tag.outputs.tag }}
-          # image_tag=${repo_tag##*/}
-          image_tag=${repo_tag//\//-}
+          image_tag=${repo_tag//\//--}
           image_ref="${image_name}:${image_tag}"
           short_image_ref="${{ env.CONTAINER_NAME }}:${image_tag}"
 
@@ -125,7 +125,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ steps.variables.outputs.image-ref }}
+          repository: ${{ steps.variables.outputs.image-name }}
           short-description: Ethereum devcontainers
           readme-filepath: src/DOCKER_README.md
 
