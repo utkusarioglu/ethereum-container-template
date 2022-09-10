@@ -43,11 +43,34 @@ jobs:
 
       - name: Declare run state
         id: run-state
-        run: scripts/workflows/run-state.sh
+        run: |
+          if [ ${{ steps.latest_tag.outputs.tag }} != tag-unavailable ] && \
+            ( \
+              [ ${{ steps.changed_files.outputs.any_modified }} == true ] || \
+              [ ${{ github.event_name }} == workflow_dispatch ] \
+            );
+          then
+            echo "::set-output name=run_docker_build::true"
+            echo "::debug::Docker build will carry out as expected."
+          else
+            echo "::set-output name=run_docker_build::false"
+            echo "::debug::Docker build is cancelled as none of the watched files have been changed."
+            echo "Docker build is cancelled as none of the watched files have been changed."
+          fi
 
       - name: Variables
         id: variables
-        run: scripts/workflows/variables.sh
+        run: |
+          image_name=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}
+          repo_tag=${{ steps.latest_tag.outputs.tag }}
+          image_tag=${repo_tag//\//-}
+          image_ref="${image_name}:${image_tag}"
+          short_image_ref="${{ env.CONTAINER_NAME }}:${image_tag}"
+
+          echo "::set-output name=image-name::$image_name"
+          echo "::set-output name=image-tag::$image_tag"
+          echo "::set-output name=image-ref::$image_ref"
+          echo "::set-output name=short-image-ref::$short_image_ref"
 
       - name: Set up Docker Buildx
         if: steps.run-state.outputs.run_docker_build == 'true'
