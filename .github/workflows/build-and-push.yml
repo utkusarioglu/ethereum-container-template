@@ -32,6 +32,7 @@ jobs:
         with:
           files: |
             src/**
+            scripts/mounted/**
             .github/workflows/build-and-push.yml
 
       - name: Get latest tag
