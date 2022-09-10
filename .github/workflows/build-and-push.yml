@@ -60,7 +60,8 @@ jobs:
         run: |
           image_name=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}
           repo_tag=${{ steps.latest_tag.outputs.tag }}
-          image_tag=${repo_tag##*/}
+          # image_tag=${repo_tag##*/}
+          image_tag=${repo_tag//\//-}
           image_ref="${image_name}:${image_tag}"
           short_image_ref="${{ env.CONTAINER_NAME }}:${image_tag}"
 
@@ -89,6 +90,8 @@ jobs:
           context: .
           tags: ${{ steps.variables.outputs.image-ref }}
           file: src/Dockerfile.dev
+          push: true
+          pull: false
           cache-from: type=local,src=${{ env.CACHE_FROM_SRC }}
           cache-to: type=local,mode=max,dest=${{ env.CACHE_TO_DEST }}
           build-args: |
