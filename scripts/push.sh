@@ -6,8 +6,8 @@ echo "last_tag: $last_tag"
 last_number=${last_tag##*/}
 next_number=$((last_number + 1))
 
-git add .
 message="$branch/$next_number"
+git add .
 git commit -m $message
 git tag -a $message -m "$message"
 git push --follow-tags
