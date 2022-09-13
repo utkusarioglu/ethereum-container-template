@@ -32,7 +32,6 @@ jobs:
         with:
           files: |
             src/**
-            scripts/mounted/**
             .github/workflows/build-and-push.yml
 
       - name: Get latest tag
@@ -64,13 +63,19 @@ jobs:
           image_name=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}
           repo_tag=${{ steps.latest_tag.outputs.tag }}
           image_tag=${repo_tag//\//-}
+          dev_image_tag=${image_tag}
           image_ref="${image_name}:${image_tag}"
+          dev_image_ref="${image_name}:${dev_image_tag}"
           short_image_ref="${{ env.CONTAINER_NAME }}:${image_tag}"
+          short_dev_image_ref="${{ env.CONTAINER_NAME }}:${dev_image_tag}"
 
-          echo "::set-output name=image-name::$image_name"
-          echo "::set-output name=image-tag::$image_tag"
-          echo "::set-output name=image-ref::$image_ref"
-          echo "::set-output name=short-image-ref::$short_image_ref"
+          echo "::set-output name=image_name::$image_name"
+          echo "::set-output name=image_tag::$image_tag"
+          echo "::set-output name=dev_image_tag::$dev_image_tag"
+          echo "::set-output name=image_ref::$image_ref"
+          echo "::set-output name=dev_image_ref::$dev_image_ref"
+          echo "::set-output name=short_image_ref::$short_image_ref"
+          echo "::set-output name=short_dev_image_ref::$short_dev_image_ref"
 
       - name: Set up Docker Buildx
         if: steps.run-state.outputs.run_docker_build == 'true'
@@ -84,13 +89,13 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build container ${{ steps.variables.outputs.short-image-ref }}
+      - name: Build container ${{ steps.variables.outputs.short_image_ref }}
         if: steps.run-state.outputs.run_docker_build == 'true'
         id: docker-build
         uses: docker/build-push-action@v2
         with:
           context: .
-          tags: ${{ steps.variables.outputs.image-ref }}
+          tags: ${{ steps.variables.outputs.image_ref }}
           file: src/Dockerfile.dev
           push: true
           pull: false
@@ -99,22 +104,22 @@ jobs:
           build-args: |
             ROOT_PASS=${{ secrets.DOCKER_IMAGE_ROOT_PASS }}
 
-      - name: Build devcontainer ${{ steps.variables.outputs.short-image-ref }}
+      - name: Build devcontainer ${{ steps.variables.outputs.short_dev_image_ref }}
         if: steps.run-state.outputs.run_docker_build == 'true'
         id: devcontainer_build
         uses: devcontainers/ci@v0.2
         env:
-          IMAGE_NAME: ${{ steps.variables.outputs.image-name }}
-          IMAGE_TAG: ${{ steps.variables.outputs.image-tag }}
+          IMAGE_NAME: ${{ steps.variables.outputs.image_name }}
+          IMAGE_TAG: ${{ steps.variables.outputs.image_tag }}
         with:
-          imageName: ${{ steps.variables.outputs.image-name }}
-          imageTag: ${{ steps.variables.outputs.image-tag }}
+          imageName: ${{ steps.variables.outputs.dev_image_name }}
+          imageTag: ${{ steps.variables.outputs.dev_image_tag }}
           subFolder: src
           runCmd: /scripts/devcontainer-check.sh
 
-      - name: Push devcontainer ${{ steps.variables.outputs.short-image-ref }}
+      - name: Push devcontainer ${{ steps.variables.outputs.short_dev_image_ref }}
         if: steps.run-state.outputs.run_docker_build == 'true'
-        run: docker push ${{ steps.variables.outputs.image-ref }}
+        run: docker push ${{ steps.variables.outputs.dev_image_ref }}
 
       - name: Set Docker Hub description
         if: steps.run-state.outputs.run_docker_build == 'true'
@@ -122,7 +127,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: ${{ steps.variables.outputs.image-name }}
+          repository: ${{ steps.variables.outputs.image_name }}
           short-description: Ethereum devcontainers
           readme-filepath: src/DOCKER_README.md
 
