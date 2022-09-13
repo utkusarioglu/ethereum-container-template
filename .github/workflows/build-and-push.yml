@@ -112,7 +112,7 @@ jobs:
           IMAGE_NAME: ${{ steps.variables.outputs.image_name }}
           IMAGE_TAG: ${{ steps.variables.outputs.image_tag }}
         with:
-          imageName: ${{ steps.variables.outputs.dev_image_name }}
+          imageName: ${{ steps.variables.outputs.image_name }}
           imageTag: ${{ steps.variables.outputs.dev_image_tag }}
           subFolder: src
           runCmd: /scripts/devcontainer-check.sh
