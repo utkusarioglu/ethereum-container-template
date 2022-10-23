@@ -1,6 +1,6 @@
 #!/bin/bash
 
-required_packages="gh node solc python jq curl vim wget"
+required_packages="gh node solc python jq curl nvim wget"
 
 for exec in $required_packages;
 do

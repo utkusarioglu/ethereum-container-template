@@ -33,11 +33,18 @@ RUN apt-get update && \
   python3.8-venv \
   software-properties-common \
   sudo \
-  vim \
   wget \
   xdot \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Neovim requires manual retrieval of the latest version
+# as the apt package is quite old
+RUN wget https://github.com/neovim/neovim/releases/download/v0.8.0/nvim-linux64.deb \
+  -O /neovim.deb
+RUN apt install -y /neovim.deb 
+RUN rm /neovim.deb
+ENV EDITOR=nvim
 
 RUN add-apt-repository -y ppa:ethereum/ethereum && \
   apt-get update && \
