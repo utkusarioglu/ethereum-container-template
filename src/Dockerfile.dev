@@ -68,6 +68,7 @@ ENV PATH="$VIRTUAL_ENV_PATH_MYTHRIL/bin:$PATH"
 COPY src/requirements.mythril.txt .
 RUN source $VIRTUAL_ENV_PATH_MYTHRIL/bin/activate
 RUN pip install -r requirements.mythril.txt --no-input --no-cache-dir
+RUN chown -R 1000:1000 $VIRTUAL_ENV_PATH_MYTHRIL
 
 ENV VIRTUAL_ENV_PATH_SLITHER=/opt/venv/slither
 RUN python3 -m venv $VIRTUAL_ENV_PATH_SLITHER
@@ -75,6 +76,7 @@ ENV PATH="$VIRTUAL_ENV_PATH_SLITHER/bin:$PATH"
 COPY src/requirements.slither.txt .
 RUN source $VIRTUAL_ENV_PATH_SLITHER/bin/activate
 RUN pip install -r requirements.slither.txt --no-input --no-cache-dir
+RUN chown -R 1000:1000 $VIRTUAL_ENV_PATH_SLITHER
 
 RUN cd $VIRTUAL_ENV_PATH_SLITHER/bin && \
   wget https://github.com/crytic/echidna/releases/download/v2.0.0/echidna-test-2.0.0-Ubuntu-18.04.tar.gz \
