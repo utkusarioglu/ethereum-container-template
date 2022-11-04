@@ -1,0 +1,4 @@
+crytic-compile==0.2.2
+protobuf==3.20.*
+manticore[native] 
+solc-select

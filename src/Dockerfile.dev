@@ -78,6 +78,14 @@ RUN source $VIRTUAL_ENV_PATH_SLITHER/bin/activate
 RUN pip install -r requirements.slither.txt --no-input --no-cache-dir
 RUN chown -R 1000:1000 $VIRTUAL_ENV_PATH_SLITHER
 
+ENV VIRTUAL_ENV_PATH_MANTICORE=/opt/venv/manticore
+RUN python3 -m venv $VIRTUAL_ENV_PATH_MANTICORE
+ENV PATH="$VIRTUAL_ENV_PATH_MANTICORE/bin:$PATH"
+COPY src/requirements.manticore.txt .
+RUN source $VIRTUAL_ENV_PATH_MANTICORE/bin/activate
+RUN pip install -r requirements.manticore.txt --no-input --no-cache-dir
+RUN chown -R 1000:1000 $VIRTUAL_ENV_PATH_MANTICORE
+
 RUN cd $VIRTUAL_ENV_PATH_SLITHER/bin && \
   wget https://github.com/crytic/echidna/releases/download/v2.0.0/echidna-test-2.0.0-Ubuntu-18.04.tar.gz \
   -O echidna.tar.gz \
