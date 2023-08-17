@@ -54,10 +54,11 @@ jobs:
 
       - name: Variables
         id: variables
+        shell: bash
         run: |
           image_name=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.CONTAINER_NAME }}
-          repo_tag=${{ github.ref_name }}
-          image_tag=${repo_tag//\//-}
+          repo_tag="${{ github.ref_name }}"
+          image_tag="${repo_tag//\//-}"
           dev_image_tag=${image_tag}
           image_ref="${image_name}:${image_tag}"
           dev_image_ref="${image_name}:${dev_image_tag}"
@@ -137,12 +138,3 @@ jobs:
           then
             mv ${{ env.CACHE_TO_DEST }} ${{ env.CACHE_FROM_SRC }}
           fi
-
-      - name: Telegram notifications
-        if: always()
-        uses: utkusarioglu/telegram-notifications@main
-        with:
-          telegram_id: ${{ secrets.TELEGRAM_ID }}
-          telegram_token: ${{ secrets.TELEGRAM_TOKEN }}
-          job_status: ${{ job.status }}
-          github_context: ${{ toJson(github) }}
