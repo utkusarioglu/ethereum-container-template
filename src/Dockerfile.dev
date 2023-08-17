@@ -3,6 +3,9 @@ FROM ubuntu:20.04
 
 ARG ROOT_PASS
 ARG USERNAME=hardhat
+ARG HOME="/home/$USERNAME"
+ARG ELAM_ABSPATH="$HOME/elam"
+ARG NVIM_VERSION='v0.8.3'
 
 RUN for arg in ROOT_PASS; \
   do \
@@ -40,7 +43,8 @@ RUN apt-get update && \
 
 # Neovim requires manual retrieval of the latest version
 # as the apt package is quite old
-RUN wget https://github.com/neovim/neovim/releases/download/v0.8.0/nvim-linux64.deb \
+ARG NVIM_URL='https://github.com/neovim/neovim/releases/download'
+RUN wget "${NVIM_URL}/${NVIM_VERSION}/nvim-linux64.deb" \
   -O /neovim.deb
 RUN apt install -y /neovim.deb 
 RUN rm /neovim.deb
@@ -54,7 +58,7 @@ RUN add-apt-repository -y ppa:ethereum/ethereum && \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get update \
   && apt-get install -y nodejs \
   && apt-get clean \
@@ -87,7 +91,7 @@ RUN pip install -r requirements.manticore.txt --no-input --no-cache-dir
 RUN chown -R 1000:1000 $VIRTUAL_ENV_PATH_MANTICORE
 
 RUN cd $VIRTUAL_ENV_PATH_SLITHER/bin && \
-  wget https://github.com/crytic/echidna/releases/download/v2.0.0/echidna-test-2.0.0-Ubuntu-18.04.tar.gz \
+  wget https://github.com/crytic/echidna/releases/download/v2.2.0/echidna-2.2.0-Ubuntu-22.04.tar.gz \
   -O echidna.tar.gz \
   && tar -xzf echidna.tar.gz \
   && rm echidna.tar.gz
@@ -96,35 +100,47 @@ RUN cd $VIRTUAL_ENV_PATH_SLITHER/bin && \
 ENV PATH="${PATH}:${HOME}/.local/bin"
 
 RUN sh -c 'echo "root:$ROOT_PASS" | chpasswd'
-RUN useradd -m hardhat
-RUN mkdir -p /home/hardhat/.config/hardhat-nodejs && \
-  chown -R 1000:1000 /home/hardhat/.config/hardhat-nodejs
+RUN useradd -md $HOME $USERNAME
 
 # This line allows gh actions to run without the need for
 # root permissions
-RUN mkdir -p /github/home/.cache/hardhat-nodejs && \
-  chown -R 1000:1000 /github/home/.cache/hardhat-nodejs
+RUN mkdir -p /github/home/.cache/hardhat-nodejs
+RUN chown -R $USERNAME:1000 /github/home/.cache/hardhat-nodejs
 
+# Required by vscode
+RUN mkdir -p $HOME/.vscode-server/extensions
+RUN mkdir -p $HOME/.vscode-server-insiders/extensions
+RUN mkdir -p $HOME/.vscode-server/bin
 # This is required by matplotlib in mythril venv
-RUN mkdir -p /home/hardhat/.config/matplotlib && \
-  chown -R 1000:1000 /home/hardhat/.config/matplotlib 
+RUN mkdir -p $HOME/.config/matplotlib
+RUN mkdir -p $HOME/.config/hardhat-nodejs
+RUN mkdir -p $HOME/.local
+RUN chown -R $USERNAME:1000 $HOME
+
 
 ENV SHELL /bin/bash
 
-USER $USERNAME
-
+# Gists
+ARG GIST_URL='https://gist.githubusercontent.com/utkusarioglu'
 ADD --chown=$USERNAME:1000 \
-  https://gist.githubusercontent.com/utkusarioglu/2d4be44dc7707afccd540ad99ba385e6/raw/create-env-example.sh \
+  "$GIST_URL/2d4be44dc7707afccd540ad99ba385e6/raw/create-env-example.sh" \
   /scripts/create-env-example.sh
 ADD --chown=$USERNAME:1000 \
-  https://gist.githubusercontent.com/utkusarioglu/3523b00578807d63b05399fe57a4b2a7/raw/.bashrc \
-  /home/$USERNAME/.bashrc
+  "$GIST_URL/3523b00578807d63b05399fe57a4b2a7/raw/.bashrc" \
+  $HOME/.bashrc
 ADD --chown=$USERNAME:1000 \
-  https://gist.githubusercontent.com/utkusarioglu/d5c216c744460c45bf6260d0de4131b4/raw/.inputrc \
-  /home/$USERNAME/.inputrc
+  "$GIST_URL/d5c216c744460c45bf6260d0de4131b4/raw/.inputrc" \
+  $HOME/.inputrc
+
+# Elam
+RUN git clone https://github.com/utkusarioglu/elam.git $ELAM_ABSPATH
+RUN echo "alias elam=$ELAM_ABSPATH/elam.sh" >> $HOME/.bash_aliases
+
+USER $USERNAME
+
 RUN chmod +x \
   /scripts/create-env-example.sh \
-  /home/$USERNAME/.bashrc \
-  /home/$USERNAME/.inputrc 
+  $HOME/.bashrc \
+  $HOME/.inputrc 
 
 COPY src/scripts /scripts
